@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+
+   
+  </head>
+
+  <body>
+    
+    <a-scene background="color:#026F90">
+
+      <a-entity id="look" look-controls camera position="0 2 20"></a-entity>
+
+      <!--Asset Management-->
+      <a-assets timeout="10000">        
+        <a-asset-item
+          id="terrainMap"
+          src="./assets/models/terrain/scene.gltf"
+        ></a-asset-item>
+
+        <a-asset-item
+          id="plane"
+          src="./assets/models/airplane/scene.gltf"
+        ></a-asset-item>
+        
+      </a-assets>
+
+      <!-- Terrain  -->
+      <a-entity
+        id="terrain"
+        gltf-model="#terrainMap"
+        position="0 0 0"
+        scale="0.3 0.3 0.3"
+        animation="property: position; to: 0 0 1000;easing:linear; loop: true; dur: 150000"
+       
+        
+      >
+      </a-entity>
+
+      <!-- Plane -->
+      <a-entity
+        id="plane_model"
+        gltf-model="#plane"
+        position="0 0 15"
+        scale="1 1"
+        rotation="0 90 0"
+              
+      >
+      </a-entity>
+
+    </a-scene>
+  </body>
+</html>
+
+---------------------------------------------
+AFRAME.registerComponent("terrain-rotation-reader", {
+    schema: {
+      speedOfRotation: { type: "number", default: 0 },
+    },
+   
+    tick: function () {
+      var mapRotation = this.el.getAttribute("rotation");
+  
+      mapRotation.y += this.data.speedOfRotation;
+  
+      this.el.setAttribute("rotation", {
+        x: mapRotation.x,
+        y: mapRotation.y,
+        z: mapRotation.z,
+      });
+    },
+  });
+-----------------------------------
+    init: function () {
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") {
+          if (this.data.speedOfRotation < 0.1) {
+            this.data.speedOfRotation += 0.01;
+          }
+        }
+        if (e.key === "ArrowLeft") {
+          if (this.data.speedOfRotation > -0.1) {
+            this.data.speedOfRotation -= 0.01;
+          }
+        }
+      });
+    },
+---------------------------------------
+AFRAME.registerComponent("plane-rotation-reader", {
+  schema: {
+    speedOfRotation: { type: "number", default: 0 },
+ speedOfAscent: { type: "number", default: 0 }
+ },
+  init: function () {
+    window.addEventListener("keydown", (e) => {
+
+      //get the data from the attributes
+      this.data.speedOfRotation = this.el.getAttribute("rotation");      
+      this.data.speedOfAscent = this.el.getAttribute("position");
+
+      var planeRotation = this.data.speedOfRotation;      
+      var planePosition = this.data.speedOfAscent;
+
+      //control the attributes with the Arrow Keys
+      if (e.key === "ArrowRight") {
+        if (planeRotation.x < 10) {
+          planeRotation.x += 0.5;
+          this.el.setAttribute("rotation", planeRotation);
+        }
+      }
+      if (e.key === "ArrowLeft") {
+        if (planeRotation.x > -10) {
+          planeRotation.x -= 0.5;
+          this.el.setAttribute("rotation", planeRotation);
+        }
+      }
+      if (e.key === "ArrowUp") {
+        if (planeRotation.z < 20) {
+          planeRotation.z += 0.5;
+          this.el.setAttribute("rotation", planeRotation);
+        }
+        if (planePosition.y < 2) {
+          planePosition.y += 0.01;
+          this.el.setAttribute("position", planePosition);
+        }
+      }
+      if (e.key === "ArrowDown") {
+        if (planeRotation.z > -10) {
+          planeRotation.z -= 0.5;
+          this.el.setAttribute("rotation", planeRotation);
+        }
+        if (planePosition.y > -2) {
+          planePosition.y -= 0.01;
+          this.el.setAttribute("position", planePosition);
+        }
+      }
+    });
+  }
+});
